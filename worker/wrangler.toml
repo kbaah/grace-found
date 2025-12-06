@@ -1,0 +1,12 @@
+name = "gracefound-contact-form"
+main = "index.js"
+compatibility_date = "2024-01-01"
+
+# Environment variables are set in Cloudflare dashboard
+# DO NOT put actual keys here - use `wrangler secret put` or dashboard
+
+# These are just placeholders to document required vars:
+# [vars]
+# SENDGRID_API_KEY = "set in dashboard"
+# NOTIFICATION_EMAIL = "set in dashboard"
+# FROM_EMAIL = "set in dashboard"

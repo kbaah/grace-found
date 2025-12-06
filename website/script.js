@@ -1,4 +1,8 @@
 // Grace Found Home Care Agency - JavaScript
+
+// IMPORTANT: Update this URL after deploying your Cloudflare Worker
+const CONTACT_FORM_API = 'https://gracefound-contact-form.YOUR_SUBDOMAIN.workers.dev';
+
 document.addEventListener('DOMContentLoaded', function() {
 
     // =====================================================
@@ -176,29 +180,50 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             if (isValid) {
-                // Show success message
+                // Show loading state
                 const submitBtn = this.querySelector('button[type="submit"]');
                 const originalText = submitBtn.innerHTML;
 
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
                 submitBtn.disabled = true;
 
-                // Simulate form submission (replace with actual submission logic)
-                setTimeout(() => {
-                    submitBtn.innerHTML = '<i class="fas fa-check"></i> Request Sent!';
-                    submitBtn.style.background = '#48bb78';
+                // Send to Cloudflare Worker / SendGrid
+                fetch(CONTACT_FORM_API, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        submitBtn.innerHTML = '<i class="fas fa-check"></i> Request Sent!';
+                        submitBtn.style.background = '#48bb78';
 
-                    // Reset form
+                        setTimeout(() => {
+                            contactForm.reset();
+                            submitBtn.innerHTML = originalText;
+                            submitBtn.style.background = '';
+                            submitBtn.disabled = false;
+                            alert('Thank you for your inquiry! We will contact you within 24 hours.');
+                        }, 1500);
+                    } else {
+                        throw new Error(result.error || 'Failed to send');
+                    }
+                })
+                .catch(error => {
+                    console.error('Form submission error:', error);
+                    submitBtn.innerHTML = '<i class="fas fa-times"></i> Error';
+                    submitBtn.style.background = '#e53e3e';
+
                     setTimeout(() => {
-                        contactForm.reset();
                         submitBtn.innerHTML = originalText;
                         submitBtn.style.background = '';
                         submitBtn.disabled = false;
-
-                        // Show thank you message
-                        alert('Thank you for your inquiry! We will contact you within 24 hours.');
+                        alert('Sorry, there was an error sending your request. Please call us directly at (223) 378-6560.');
                     }, 1500);
-                }, 1500);
+                });
             }
         });
 
